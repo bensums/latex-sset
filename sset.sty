@@ -1,0 +1,63 @@
+\RequirePackage{etoolbox}
+\ProvidesPackage{sset}[2012/09/27 Typeset signed sets]
+
+% These may be overriden by the user.
+\newcommand*{\ssetmult}{\cdot}
+\newcommand*{\ssetprod}{\prod}
+\newcommand*{\ssetsingle}[1]{#1}
+\newcommand*{\ssetbarred}[1]{\overline{#1}}
+\newcommand*{\ssetdouble}[1]{#1\overline{#1}}
+% The below can be pasted into our document if we want a more immediately
+% understandable notation involving only familiar "-" and "\pm" signs.
+%\renewcommand*{\ssetsingle}[1]{#1}
+%\renewcommand*{\ssetbarred}[1]{-#1}
+%\renewcommand*{\ssetdouble}[1]{\pm #1}
+
+% Main formatting macro.
+\def\sset@worker#1#2{% #1 command, #2 arg. Possible commands are:
+                    %   s: an element to be as is,
+                    %   b: an element to be barred,
+                    %   d: an element to be doubled,
+                    %   .: (argument ignored) - this is meant to mean
+                    %      something like \ldots or \cdots to specify a range.
+                    %   t: (argument ignored) terminate command - do not
+                    %      process further.
+  \def\cmd@term{t}
+  \def\cmd@plain{s}
+  \def\cmd@bar{b}
+  \def\cmd@double{d}
+  \def\cmd@to{.}
+  \def\cmd{#1}
+  \ifx\cmd\cmd@term % do no further processing.
+  \else
+    \ifx\cmd\cmd@plain \sset@plain{#2} \fi
+    \ifx\cmd\cmd@bar \sset@bar{#2} \fi
+    \ifx\cmd\cmd@double \sset@double{#2} \fi
+    \ifx\cmd\cmd@to \sset@to{#2} \fi
+    \expandafter \sset@worker % process remaining commands.
+  \fi
+}
+
+\def\sset@plain#1{% Typeset as is.
+	\ssetsingle{#1}
+}
+
+\def\sset@bar#1{% Typeset a barred element.
+	\ssetbarred{#1}
+}
+
+\def\sset@double#1{% Typeset a double.
+	\ssetdouble{#1}
+}
+
+\def\sset@to#1{% Typeset a range indicator, eg. \ldots.
+  \dotso
+}
+
+\newcommand*{\sset}[1]{%
+  \ifblank{#1}{% if
+    \emptyset
+  }{ %else
+  \{\sset@worker#1tt\}
+  }
+} % tt is the terminate command for \sset@worker.
